@@ -1,9 +1,14 @@
 import cv2
+import numpy as np
 
 import dearpygui.dearpygui as dpg
 
 from kaleidoscope.controller import KSettings, Kaleidoscope
 from kaleidoscope.components.settings import SettingsItem, SettingsEditor
+from kaleidoscope.components.dialog import (
+    open_save_dialog_native,
+    open_file_dialog_native,
+)
 from kaleidoscope.components.texture import Texture
 from kaleidoscope.utils.ratelimiter import ratelimiter
 
@@ -25,9 +30,8 @@ class KaleidoscopeGui:
         self.create_image_view()
         self.create_menu()
 
-    @ratelimiter(2)
+    @ratelimiter(4)
     def update_image(self):
-        print("UPDATING IMAG")
         print(self.textures)
         settings_new = self.settings_editor.get_values()
         if not settings_new:
@@ -38,19 +42,14 @@ class KaleidoscopeGui:
 
         # update texture
         self.textures["output"].update(self.kaleidoscope.out())
-        # print(self.textures)
-
-        # update view
-        # self.create_image_view()
-
-        # from kaleidoscope.utils import show_img
-        # show_img(self.kaleidoscope.out())
 
     def create_settings(self):
 
         settings = [
             SettingsItem("num_repeats", 2, "slider_double", min=0.5, max=10),
-            SettingsItem("pad_size", 100, "slider_int", min=10, max=500),
+            SettingsItem("pad_size", 400, "slider_int", min=100, max=500),
+            SettingsItem("angle_offset_in", 0, "slider_double", min=0, max=np.pi * 2),
+            SettingsItem("angle_offset_out", 0, "slider_double", min=0, max=np.pi * 2),
         ]
         self.settings_editor = SettingsEditor(
             settings, "Kaleidoscope Settings", callback=self.update_image
@@ -82,6 +81,15 @@ class KaleidoscopeGui:
 
     def create_menu(self):
         with dpg.viewport_menu_bar():
+            with dpg.menu(label="File"):
+                dpg.add_menu_item(
+                    label="Load Image",
+                    callback=self.load_image,
+                )
+                dpg.add_menu_item(
+                    label="Save Image",
+                    callback=self.save_image,
+                )
             with dpg.menu(label="Layout"):
                 dpg.add_menu_item(
                     label="Save",
@@ -89,16 +97,31 @@ class KaleidoscopeGui:
                 )
 
     def loop(self):
-        # dpg.start_dearpygui()
         dpg.show_viewport()
+
+        # dpg.start_dearpygui()
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
 
         self.exit()
 
     def exit(self):
-        # dpg.save_init_file(INIT_FILE)
         dpg.destroy_context()
+
+    def load_image(self):
+        path = open_file_dialog_native()
+        if path:
+            img = cv2.imread(path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            self.kaleidoscope.update_input_image(img)
+            self.textures["input"].update(self.kaleidoscope.input())
+
+    def save_image(self):
+        path = open_save_dialog_native()
+        if path:
+            img = self.kaleidoscope.out()
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(path, img)
 
 
 if __name__ == "__main__":

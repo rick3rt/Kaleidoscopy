@@ -40,6 +40,9 @@ class Kaleidoscope:
         self.run()
 
     def run(self):
+
+        print("K SETTINGS: ", self.settings)
+
         if self.settings["tile"]:
             pix_mag, pix_theta_k = create_pattern(
                 self.image_in,
@@ -76,21 +79,18 @@ class Kaleidoscope:
             )
 
         else:
-            self.kaleidoscope()
+            self.image_out = kaleidoscope(
+                self.image_in,
+                self.settings["num_repeats"],
+                self.settings["angle_offset_in"],
+                self.settings["angle_offset_out"],
+                self.settings["center_in"],
+                self.settings["center_out"],
+            )
             if self.settings["pad_size"]:
                 self.image_out = img_center_crop(
                     self.image_out, *self.settings["pad_size"]
                 )
-
-    def kaleidoscope(self):
-        self.image_out = kaleidoscope(
-            self.image_in,
-            self.settings["num_repeats"],
-            self.settings["angle_offset_in"],
-            self.settings["angle_offset_out"],
-            self.settings["center_in"],
-            self.settings["center_out"],
-        )
 
     def input(self):
         return self.image_in
@@ -115,6 +115,10 @@ class Kaleidoscope:
                 value = (value, value)
 
             self.settings[key] = value
+
+    def update_input_image(self, img):
+        self.image_in = img.copy()
+        self.run()
 
 
 class KaleidoscopeController:

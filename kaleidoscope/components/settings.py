@@ -1,5 +1,8 @@
-import time
 import dearpygui.dearpygui as dpg
+import random
+
+# class SliderCustom:
+#     pass
 
 
 class SettingsItem:
@@ -69,7 +72,17 @@ class SettingsEditor:
                 s.render()
                 s.set_callback(self.callback)
 
-            dpg.add_button(label="Get Values", callback=self.callback)
+            dpg.add_button(label="Process", callback=self.callback)
+            dpg.add_button(label="Randomize", callback=self.randomize)
+
+    def randomize(self):
+        for s in self.settings:
+            s.value = s.min + (s.max - s.min) * random.random()
+            dpg.set_value(s.id, s.value)
+            self.data[s.name] = s.value
+        # self.get_values()
+        if self.callback:
+            self.callback()
 
     def get_values(self):
         for s in self.settings:
