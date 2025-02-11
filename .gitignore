@@ -1,0 +1,8 @@
+.idea/
+.vs/
+.vscode/
+out/
+venv/
+output/
+__pycache__/
+kaleidoscope.egg-info/
