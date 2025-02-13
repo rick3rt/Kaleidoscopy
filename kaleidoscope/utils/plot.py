@@ -15,11 +15,8 @@ def show_img_grid(images_dict, ncols=2, show_axis=False, fig_size=(10, 10)):
         ax[row, col].set_title(title)
         if not show_axis:
             ax[row, col].axis("off")
-
-    plt.tight_layout()
     plt.show()
-
-    return fig
+    # plt.tight_layout()
 
 
 def show_img(img):
@@ -34,3 +31,15 @@ def plot_point(p, *args, **kwargs):
 
 def plot_vec(start, end, *args, **kwargs):
     plt.plot([start[0], end[0]], [start[1], end[1]], *args, **kwargs)
+
+
+def plot_mapping(mapping: list | tuple, figsize=(10, 5), ncols=2, colorbar=False):
+    n = len(mapping)
+    nrows = n // ncols
+    fig, axs = plt.subplots(nrows, ncols, figsize=figsize)
+    axs = axs.flatten()
+    for i, m in enumerate(mapping):
+        axs[i].imshow(m)
+        if colorbar:
+            plt.colorbar(axs[i].imshow(m), ax=axs[i], shrink=0.6)
+    plt.show()

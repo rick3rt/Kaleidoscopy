@@ -13,6 +13,7 @@ class SettingsItem:
         type="slider_double",
         min=None,
         max=None,
+        options=None,
     ):
         self.name = name
         self.id = dpg.generate_uuid()
@@ -20,6 +21,7 @@ class SettingsItem:
         self.type = type
         self.min = min
         self.max = max
+        self.options = options
 
     def render(self):
         if self.type == "slider_double":
@@ -38,12 +40,35 @@ class SettingsItem:
                 max_value=self.max,
                 tag=self.id,
             )
+        elif self.type == "checkbox":
+            dpg.add_checkbox(label=self.name, default_value=self.value, tag=self.id)
+
+        elif self.type == "combo":
+            dpg.add_combo(
+                label=self.name,
+                items=self.options,
+                default_value=self.value,
+                tag=self.id,
+            )
+        else:
+            raise ValueError(
+                f"Cannot make SettingsItem with type: {self.type}. Not implemented yet"
+            )
 
     def set_callback(self, callback):
         dpg.set_item_callback(self.id, callback)
 
     def get_value(self):
         return dpg.get_value(self.id)
+
+    def randomize(self):
+        if "slider" in self.type:
+            self.value = self.min + (self.max - self.min) * random.random()
+        elif self.type == "checkbox":
+            self.value = random.choice([True, False])
+
+        dpg.set_value(self.id, self.value)
+        return self.value
 
 
 class SettingsEditor:
@@ -77,9 +102,7 @@ class SettingsEditor:
 
     def randomize(self):
         for s in self.settings:
-            s.value = s.min + (s.max - s.min) * random.random()
-            dpg.set_value(s.id, s.value)
-            self.data[s.name] = s.value
+            self.data[s.name] = s.randomize()
         # self.get_values()
         if self.callback:
             self.callback()
@@ -106,6 +129,7 @@ if __name__ == "__main__":
     settings = [
         SettingsItem("num_repeats", 2, "slider_double", min=0.5, max=10),
         SettingsItem("pad_size", 100, "slider_int", min=10, max=500),
+        SettingsItem("checker", False, "checkbox"),
     ]
     label = "settings"
 

@@ -28,54 +28,6 @@ def kaleidoscope(
         invert_sin,
     )
 
-    # h, w = img.shape[:2]
-
-    # if not center_out:
-    #     center_out = (w // 2, h // 2)
-    # if not center_in:
-    #     center_in = (w // 2, h // 2)
-
-    # x = np.arange(w)
-    # y = np.arange(h)
-
-    # # create meshgrid
-    # x -= center_out[0]
-    # y -= center_out[1]
-    # X, Y = np.meshgrid(x, y)
-
-    # # calculate magnitude and angle of each sample point in input image
-    # pix_mag = np.sqrt(X**2 + Y**2)
-    # pix_theta = np.arctan2(X, Y) + angle_offset_in
-
-    # # pix_theta_k = np.abs((pix_theta - angle_offset_out) % angle_range - angle_range / 2)
-
-    # if num_repeats == 0:
-    #     pix_theta_k = pix_theta - angle_offset_in
-
-    # else:
-    #     angle_range = 2 * np.pi / num_repeats
-    #     pix_theta_k = np.abs(
-    #         (pix_theta - angle_offset_in) % angle_range - angle_range / 2
-    #     )
-
-    # # convert to cartesian sample points in input image, offset by c_in
-    # if invert_sin:
-    #     Xk = (pix_mag * np.sin(pix_theta_k) + center_in[0]).astype(np.int64)
-    #     Yk = (pix_mag * np.cos(pix_theta_k) + center_in[1]).astype(np.int64)
-    # else:
-    #     Xk = (pix_mag * np.cos(pix_theta_k) + center_in[0]).astype(np.int64)
-    #     Yk = (pix_mag * np.sin(pix_theta_k) + center_in[1]).astype(np.int64)
-    # inds_to_remove = (Yk < 0) | (Yk >= h) | (Xk < 0) | (Xk >= w)
-    # Xk[inds_to_remove] = 0
-    # Yk[inds_to_remove] = 0
-
-    # img_out = img.copy()
-    # tmp = img_out[0, 0].copy()
-    # img_out[0, 0] = (0, 0, 0)
-    # img_out = img_out[Yk, Xk]
-    # img_out[0, 0] = tmp
-    # return img_out
-
 
 def create_pattern(
     img,
@@ -103,7 +55,7 @@ def create_pattern(
 
     # calculate magnitude and angle of each sample point in input image
     pix_mag = np.sqrt(X**2 + Y**2)
-    pix_theta = np.arctan2(X, Y) - angle_offset_in
+    pix_theta = np.arctan2(X, Y) - angle_offset_out
 
     if num_repeats == 0:
         pix_theta_k = pix_theta
@@ -112,7 +64,7 @@ def create_pattern(
         angle_range = 2 * np.pi / num_repeats
         pix_theta_k = np.abs((pix_theta % angle_range) - angle_range / 2)
 
-    pix_theta_k = pix_theta_k + angle_offset_out % 2 * np.pi
+    pix_theta_k = pix_theta_k + angle_offset_in % 2 * np.pi
 
     # pix_theta_k = np.pow(pix_theta_k, 1.5)
     # pix_theta_k = pix_theta_k + map(pix_mag, 0, np.max(pix_mag[:]), -1, 0.5)
